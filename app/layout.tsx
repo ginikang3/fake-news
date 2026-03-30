@@ -13,8 +13,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Noticiario Bromas MX", // 제목만 살짝 수정
+  title: "Noticiario Bromas MX",
   description: "Trolea a tus amigos con noticias falsas",
+  // --- 여기에서 이미지만 연결 (Open Graph 및 Twitter Card) ---
+  openGraph: {
+    images: [
+      {
+        url: "/thumbnail.png", // public 폴더의 영문 파일명과 일치해야 함
+        width: 1200,
+        height: 630,
+        alt: "Breaking News Thumbnail",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/thumbnail.png"],
+  },
+  // ---------------------------------------------------------
 };
 
 export default function RootLayout({
