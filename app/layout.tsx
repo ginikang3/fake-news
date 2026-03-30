@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// --- 썸네일 제목 동적 생성 ---
+// --- 썸네일 제목 동적 생성 (수정본) ---
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
@@ -26,7 +26,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
   if (t && typeof t === 'string') {
     try {
-      // 클라이언트 에러 방지를 위해 서버 환경에서만 Buffer 사용
+      // 💡 기존 Buffer 로직을 유지하되 디코딩 에러 방지 처리
       const decoded = Buffer.from(t, 'base64').toString('utf8');
       dynamicTitle = decodeURIComponent(decoded);
     } catch (e) {
@@ -40,13 +40,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     openGraph: {
       title: dynamicTitle,
       description: dynamicDescription,
-      images: ["/thumbnail.png"],
+      type: "website",
+      // images: ["/thumbnail.png"], // 👈 사진이 안 나오면 이 주석을 풀고 thumbnail.png를 public 폴더에 넣으세요
     },
     twitter: {
       card: "summary_large_image",
       title: dynamicTitle,
       description: dynamicDescription,
-      images: ["/thumbnail.png"],
+      // images: ["/thumbnail.png"],
     },
   };
 }
@@ -58,9 +59,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      {/* head 태그를 명시적으로 써주면 스크립트 에러 방지에 도움이 됩니다 */}
       <head>
-        {/* Monetag 광고 스크립트 */}
+        {/* 기존 Monetag 광고 스크립트 유지 */}
         <script 
           dangerouslySetInnerHTML={{ 
             __html: `(function(s){s.dataset.zone='10804827',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` 
