@@ -16,14 +16,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const t = params?.t;
   const i = params?.i;
 
-  // 💡 크롤러가 헷갈리지 않게 URL에서 직접 이미지를 추출합니다.
+  // 🚀 디버거 에러 해결: 이미지와 크기를 최우선으로, 가장 빠르게 리턴
   const imageUrl = i ? decodeURIComponent(i) : "https://latam-en-vivo.online/thumbnail.png";
   let titleText = "¡NOTICIA DE ÚLTIMA HORA!";
 
   if (t) {
     try {
       titleText = decodeURIComponent(Buffer.from(t, 'base64').toString('utf-8'));
-    } catch (e) { console.error(e); }
+    } catch (e) { /* 에러 시 기본값 유지 */ }
   }
 
   return {
@@ -34,13 +34,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       description: "Haz clic para ver la noticia completa.",
       images: [
         {
-          url: imageUrl, // 👈 수파베이스 다이렉트 링크
-          width: 1200,
-          height: 630,
+          url: imageUrl,
+          width: 1200, // 👈 디버거가 요구한 필수 태그
+          height: 630, // 👈 디버거가 요구한 필수 태그
         },
       ],
       type: "website",
-      url: "./", // 현재 경로 유지
     },
     twitter: {
       card: "summary_large_image",
@@ -54,7 +53,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <head>
-        {/* 광고 스크립트 3종 (절대 보존) */}
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='10804827',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
         <script src="https://5gvci.com/act/files/tag.min.js?z=10804826" data-cfasync="false" async />
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='10804825',s.src='https://izcle.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
