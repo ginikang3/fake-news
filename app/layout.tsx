@@ -11,37 +11,33 @@ type Props = {
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const params = await searchParams;
-  const t = params?.t; // 제목 (Base64)
-  const i = params?.i; // 이미지 URL 👈 이게 추가되어야 사진이 바뀝니다!
+  const t = params?.t as string; // 제목 (Base64)
+  const i = params?.i as string; // 💡 이미지 주소 (핵심!)
 
-  let dynamicTitle = "Noticiario Bromas MX"; 
-  const dynamicDescription = "¡ÚLTIMO MOMENTO! Fuentes oficiales confirman la noticia.";
-  
-  // 💡 사용자가 올린 사진이 없으면 보여줄 기본 이미지
+  let dynamicTitle = "Noticiario Bromas MX";
+  // 사용자가 올린 이미지가 없을 때만 기본 이미지 사용
   let dynamicImage = "https://latam-en-vivo.online/thumbnail.png"; 
 
-  if (t && typeof t === 'string') {
+  if (t) {
     try {
-      const decoded = Buffer.from(t, 'base64').toString('utf8');
-      dynamicTitle = decodeURIComponent(decoded);
+      dynamicTitle = decodeURIComponent(Buffer.from(t, 'base64').toString('utf8'));
     } catch (e) { console.error(e); }
   }
 
-  // 💡 핵심: i 파라미터에 이미지가 있으면 썸네일을 그걸로 교체!
-  if (i && typeof i === 'string') {
+  // 🚀 [여기 주목] 파라미터 i에 이미지 주소가 있으면 그걸 썸네일로 강제 지정!
+  if (i) {
     dynamicImage = decodeURIComponent(i);
   }
 
   return {
     title: dynamicTitle,
-    description: dynamicDescription,
     openGraph: {
       title: dynamicTitle,
-      description: dynamicDescription,
+      description: "¡ÚLTIMO MOMENTO! Fuentes oficiales confirman la noticia.",
       type: "website",
       images: [
         {
-          url: dynamicImage, // 👈 여기가 님이 올린 사진 주소로 들어감
+          url: dynamicImage, // 👈 왓츠앱이 읽어가는 실제 사진 주소
           width: 1200,
           height: 630,
         },
@@ -59,9 +55,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <head>
+        {/* Monetag 광고 코드 유지 */}
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='10804827',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
-        <script src="https://5gvci.com/act/files/tag.min.js?z=10804826" data-cfasync="false" async />
-        <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='10804825',s.src='https://izcle.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
