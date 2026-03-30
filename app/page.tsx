@@ -9,23 +9,27 @@ export default function CreateBromaPage() {
   const [link, setLink] = useState('');
   const [mounted, setMounted] = useState(false);
 
+  // Hydration 에러 방지 (클라이언트 전용 렌더링 확인)
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const handleCopy = async (text: string) => {
-    // 기존 복사 로직 유지...
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-      alert('¡Copiado!');
-    } else {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        alert('¡Copiado con éxito!');
+      } else {
+        throw new Error('Fallback to execCommand');
+      }
+    } catch (err) {
       const textArea = document.createElement("textarea");
       textArea.value = text;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert('¡Copiado!');
+      alert('¡Copiado con éxito!');
     }
   };
 
@@ -37,33 +41,16 @@ export default function CreateBromaPage() {
     const title = formData.get('title') as string;
     const file = formData.get('image') as File;
 
-    if (!file || file.size === 0) {
-      alert('Por favor selecciona una imagen válida.');
-      setLoading(false);
-      return;
-    }
-
     try {
-      // 1. 이미지 압축 (안전장치 추가)
-      let finalFile: File | Blob = file;
-      try {
-        const options = { 
-          maxSizeMB: 0.2, 
-          maxWidthOrHeight: 800,
-          useWebWorker: true // 속도 향상 및 로드 에러 방지
-        };
-        finalFile = await imageCompression(file, options);
-      } catch (compressionError) {
-        console.error('Compression failed, using original', compressionError);
-        // 압축 실패 시 원본 그대로 진행 (에러 방지)
-        finalFile = file;
-      }
+      // 1. 이미지 압축 (안전하게 처리)
+      const options = { maxSizeMB: 0.2, maxWidthOrHeight: 800, useWebWorker: true };
+      const compressedFile = await imageCompression(file, options);
 
-      // 2. 스토리지 업로드
-      const fileName = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+      // 2. Supabase Storage 업로드
+      const fileName = `news_${Date.now()}`;
       const { error: storageError } = await supabase.storage
         .from('news-images')
-        .upload(fileName, finalFile);
+        .upload(fileName, compressedFile);
 
       if (storageError) throw storageError;
 
@@ -79,13 +66,13 @@ export default function CreateBromaPage() {
       if (dbError) throw dbError;
 
       if (data) {
-        const encodedTitle = Buffer.from(title).toString('base64');
+        // 클라이언트에서 안전하게 btoa(Base64) 사용
+        const encodedTitle = btoa(encodeURIComponent(title));
         const generatedLink = `${window.location.origin}/?t=${encodedTitle}`; 
         setLink(generatedLink);
       }
     } catch (err: any) {
-      // 에러 메시지를 더 구체적으로 표시
-      alert('Error: ' + (err.message || 'Load failed'));
+      alert('Error: ' + (err.message || 'Error al procesar'));
     } finally {
       setLoading(false);
     }
@@ -94,24 +81,77 @@ export default function CreateBromaPage() {
   if (!mounted) return null;
 
   return (
-    <main className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      {/* ... 나머지 UI 코드는 동일 ... */}
-      <div className="max-w-md w-full bg-white shadow-xl rounded-lg overflow-hidden border-t-4 border-red-600 p-6">
-        <h1 className="text-2xl font-black text-center mb-6 italic">NOTICIARIO BROMAS MX</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-           <input name="title" placeholder="Título de la noticia" className="w-full border p-3 rounded text-black" required />
-           <input type="file" name="image" accept="image/*" className="w-full text-sm" required />
-           <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-4 rounded">
-             {loading ? 'GENERANDO...' : '¡CREAR NOTICIA!'}
-           </button>
-        </form>
-        {link && (
-          <div className="mt-6 p-4 bg-green-50 rounded border border-green-200">
-             <input readOnly value={link} className="w-full p-2 text-xs border mb-2" />
-             <button onClick={() => handleCopy(link)} className="w-full bg-blue-600 text-white py-2 rounded text-sm font-bold">COPIAR LINK</button>
-          </div>
-        )}
+    <main className="min-h-screen bg-gray-900 flex flex-col items-center justify-center py-10 px-4 font-sans">
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden border-b-8 border-red-600">
+        {/* 헤더 부분: 강렬한 빨간색 뉴스 바 */}
+        <div className="bg-red-600 p-4 text-center">
+          <h1 className="text-white text-2xl font-black italic tracking-tighter uppercase">Noticiario Bromas MX</h1>
+          <p className="text-red-100 text-[10px] font-bold">EDICIÓN ESPECIAL MÉXICO</p>
+        </div>
+
+        <div className="p-8">
+          <p className="text-gray-600 text-sm mb-8 text-center leading-tight">
+            Crea una noticia impactante y engaña a todos tus amigos en redes sociales.
+          </p>
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-[11px] font-black text-red-600 uppercase mb-2 ml-1">1. Escribe el Título</label>
+              <input 
+                name="title" 
+                placeholder="Ej: ¡Bad Bunny en el Zócalo!" 
+                className="w-full border-2 border-gray-100 bg-gray-50 p-4 rounded-xl text-black font-bold outline-none focus:border-red-500 transition-all placeholder:text-gray-300"
+                required 
+              />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-black text-red-600 uppercase mb-2 ml-1">2. Sube una Foto</label>
+              <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-gray-100 transition-all cursor-pointer">
+                <input 
+                  type="file" 
+                  name="image" 
+                  accept="image/*" 
+                  className="w-full text-xs text-gray-500 file:hidden cursor-pointer"
+                  required 
+                />
+                <p className="text-[10px] text-gray-400 text-center uppercase">Toca para seleccionar imagen</p>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full bg-red-600 hover:bg-black text-white font-black py-5 rounded-xl shadow-lg transition-all active:scale-95 disabled:bg-gray-300 uppercase italic tracking-widest text-lg"
+            >
+              {loading ? 'Generando...' : '¡PUBLICAR NOTICIA!'}
+            </button>
+          </form>
+
+          {link && (
+            <div className="mt-8 p-6 bg-yellow-50 border-2 border-yellow-200 rounded-2xl animate-pulse-short">
+              <p className="font-black text-yellow-900 text-xs mb-3 uppercase flex items-center">
+                <span className="mr-2">🔥</span> ¡Link de la Trampa listo!
+              </p>
+              <input 
+                readOnly 
+                value={link} 
+                className="w-full p-3 bg-white border border-yellow-300 rounded-lg text-[11px] text-gray-700 mb-4 focus:outline-none font-mono" 
+              />
+              <button 
+                onClick={() => handleCopy(link)} 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-black py-3 rounded-lg uppercase shadow-md active:bg-blue-800 transition-all"
+              >
+                Copiar Link y engañar
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+      
+      <p className="mt-8 text-gray-500 text-[10px] uppercase tracking-widest font-bold">
+        © 2026 Noticiario Bromas MX
+      </p>
     </main>
   );
 }
