@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// --- 썸네일 제목 동적 생성 (수정본) ---
+// --- 썸네일 제목 및 이미지 동적 생성 ---
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
@@ -23,10 +23,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   
   let dynamicTitle = "Noticiario Bromas MX"; 
   const dynamicDescription = "¡ÚLTIMO MOMENTO! Fuentes oficiales confirman la noticia que está sacudiendo al mundo.";
+  // 기본 썸네일 이미지 경로 (public 폴더에 thumbnail.png가 있어야 함)
+  const defaultImage = "/thumbnail.png"; 
 
   if (t && typeof t === 'string') {
     try {
-      // 💡 기존 Buffer 로직을 유지하되 디코딩 에러 방지 처리
+      // Base64 디코딩 후 제목 추출
       const decoded = Buffer.from(t, 'base64').toString('utf8');
       dynamicTitle = decodeURIComponent(decoded);
     } catch (e) {
@@ -41,13 +43,20 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       title: dynamicTitle,
       description: dynamicDescription,
       type: "website",
-      // images: ["/thumbnail.png"], // 👈 사진이 안 나오면 이 주석을 풀고 thumbnail.png를 public 폴더에 넣으세요
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: dynamicTitle,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: dynamicTitle,
       description: dynamicDescription,
-      // images: ["/thumbnail.png"],
+      images: [defaultImage],
     },
   };
 }
