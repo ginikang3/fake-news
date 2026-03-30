@@ -31,13 +31,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     openGraph: {
       title: titleText,
       description: "Haz clic para ver la noticia completa.",
-      images: [
-        {
-          url: imageUrl,
-          width: 1200, // 👈 필수
-          height: 630, // 👈 필수
-        },
-      ],
+      images: [{ url: imageUrl, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
