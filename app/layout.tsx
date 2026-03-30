@@ -30,6 +30,31 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+
+        {/* --- Monetag Ad Scripts Start --- */}
+        
+        {/* 1. MultiTag (Zone: 10804827) */}
+        <script 
+          dangerouslySetInnerHTML={{ 
+            __html: `(function(s){s.dataset.zone='10804827',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` 
+          }} 
+        />
+
+        {/* 2. Interstitial/Popunder (Zone: 10804826) */}
+        <script 
+          src="https://5gvci.com/act/files/tag.min.js?z=10804826" 
+          data-cfasync="false" 
+          async 
+        />
+
+        {/* 3. Vignette (Zone: 10804825) */}
+        <script 
+          dangerouslySetInnerHTML={{ 
+            __html: `(function(s){s.dataset.zone='10804825',s.src='https://izcle.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` 
+          }} 
+        />
+
+        {/* --- Monetag Ad Scripts End --- */}
       </body>
     </html>
   );
