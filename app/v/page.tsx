@@ -3,17 +3,18 @@
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
+// 클라이언트 컴포넌트 내부 로직
 function NewsContent() {
   const searchParams = useSearchParams();
-  const [title, setTitle] = useState('¡ÚLTIMO MOMENTO!'); // 기본값 설정
+  const [title, setTitle] = useState('¡ÚLTIMO MOMENTO!'); 
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const t = searchParams.get('t');
     if (t) {
       try {
-        // Base64 디코딩 후 제목 설정
-        setTitle(decodeURIComponent(atob(t)));
+        // 클라이언트 사이드 디코딩
+        setTitle(decodeURIComponent(window.atob(t)));
       } catch (e) {
         console.error("Decoding error:", e);
       }
@@ -22,7 +23,6 @@ function NewsContent() {
     return () => clearTimeout(timer);
   }, [searchParams]);
 
-  // 브라우저 탭 제목도 동적으로 변경
   useEffect(() => {
     if (title) document.title = title;
   }, [title]);
@@ -84,6 +84,7 @@ function NewsContent() {
   );
 }
 
+// export default는 반드시 Suspense로 감싸야 쿼리 파라미터를 읽을 때 빌드 에러가 안 납니다.
 export default function ViewPage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-bold text-red-600">Cargando noticia...</div>}>
