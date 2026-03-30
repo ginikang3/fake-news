@@ -15,38 +15,34 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const params = await searchParams;
   const t = params?.t;
   const i = params?.i;
+  const v = params?.v;
 
   let dynamicTitle = "¡NOTICIA DE ÚLTIMA HORA!";
   let dynamicImage = "https://latam-en-vivo.online/thumbnail.png";
+  
+  // 🚀 현재 전체 URL을 구성하여 og:url에 주입 (크롤러 강제 갱신용)
+  const currentUrl = `https://latam-en-vivo.online/?t=${t || ''}&i=${i || ''}&v=${v || ''}`;
 
   if (t) {
     try {
-      // 서버측에서 안전하게 Base64 디코딩
       const decodedTitle = Buffer.from(t, 'base64').toString('utf-8');
       dynamicTitle = decodeURIComponent(decodedTitle);
-    } catch (e) {
-      console.error("Title decoding failed", e);
-    }
+    } catch (e) { console.error(e); }
   }
 
   if (i) {
-    // 💡 이미지 URL은 인코딩된 상태 그대로 오므로 한 번만 디코딩
     dynamicImage = decodeURIComponent(i);
   }
 
   return {
+    metadataBase: new URL('https://latam-en-vivo.online'),
     title: dynamicTitle,
-    description: "Haz clic para ver la noticia completa.",
     openGraph: {
       title: dynamicTitle,
       description: "¡ÚLTIMO MOMENTO! Fuentes oficiales confirman la noticia.",
-      images: [
-        {
-          url: dynamicImage,
-          width: 1200,
-          height: 630,
-        },
-      ],
+      url: currentUrl, // 👈 [핵심] 크롤러에게 이 파라미터 주소가 진짜라고 알려줌
+      siteName: "Noticiario Bromas MX",
+      images: [{ url: dynamicImage, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
