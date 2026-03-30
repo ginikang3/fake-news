@@ -15,40 +15,37 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const params = await searchParams;
   const t = params?.t;
   const i = params?.i;
-  const v = params?.v;
 
-  let dynamicTitle = "¡NOTICIA DE ÚLTIMA HORA!";
-  let dynamicImage = "https://latam-en-vivo.online/thumbnail.png";
-  
-  // 🚀 현재 전체 URL을 구성하여 og:url에 주입 (크롤러 강제 갱신용)
-  const currentUrl = `https://latam-en-vivo.online/?t=${t || ''}&i=${i || ''}&v=${v || ''}`;
+  // 💡 크롤러가 헷갈리지 않게 URL에서 직접 이미지를 추출합니다.
+  const imageUrl = i ? decodeURIComponent(i) : "https://latam-en-vivo.online/thumbnail.png";
+  let titleText = "¡NOTICIA DE ÚLTIMA HORA!";
 
   if (t) {
     try {
-      const decodedTitle = Buffer.from(t, 'base64').toString('utf-8');
-      dynamicTitle = decodeURIComponent(decodedTitle);
+      titleText = decodeURIComponent(Buffer.from(t, 'base64').toString('utf-8'));
     } catch (e) { console.error(e); }
-  }
-
-  if (i) {
-    dynamicImage = decodeURIComponent(i);
   }
 
   return {
     metadataBase: new URL('https://latam-en-vivo.online'),
-    title: dynamicTitle,
+    title: titleText,
     openGraph: {
-      title: dynamicTitle,
-      description: "¡ÚLTIMO MOMENTO! Fuentes oficiales confirman la noticia.",
-      url: currentUrl, // 👈 [핵심] 크롤러에게 이 파라미터 주소가 진짜라고 알려줌
-      siteName: "Noticiario Bromas MX",
-      images: [{ url: dynamicImage, width: 1200, height: 630 }],
+      title: titleText,
+      description: "Haz clic para ver la noticia completa.",
+      images: [
+        {
+          url: imageUrl, // 👈 수파베이스 다이렉트 링크
+          width: 1200,
+          height: 630,
+        },
+      ],
       type: "website",
+      url: "./", // 현재 경로 유지
     },
     twitter: {
       card: "summary_large_image",
-      title: dynamicTitle,
-      images: [dynamicImage],
+      title: titleText,
+      images: [imageUrl],
     },
   };
 }
@@ -57,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <head>
+        {/* 광고 스크립트 3종 (절대 보존) */}
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='10804827',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
         <script src="https://5gvci.com/act/files/tag.min.js?z=10804826" data-cfasync="false" async />
         <script dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='10804825',s.src='https://izcle.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
