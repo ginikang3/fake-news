@@ -16,14 +16,13 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const t = params?.t;
   const i = params?.i;
 
-  // 🚀 디버거 에러 해결: 이미지와 크기를 최우선으로, 가장 빠르게 리턴
   const imageUrl = i ? decodeURIComponent(i) : "https://latam-en-vivo.online/thumbnail.png";
   let titleText = "¡NOTICIA DE ÚLTIMA HORA!";
 
   if (t) {
     try {
       titleText = decodeURIComponent(Buffer.from(t, 'base64').toString('utf-8'));
-    } catch (e) { /* 에러 시 기본값 유지 */ }
+    } catch (e) { /* 디코딩 실패 시 기본값 */ }
   }
 
   return {
@@ -32,11 +31,14 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     openGraph: {
       title: titleText,
       description: "Haz clic para ver la noticia completa.",
+      url: "./",
+      siteName: "Noticiario Bromas MX",
       images: [
         {
           url: imageUrl,
-          width: 1200, // 👈 디버거가 요구한 필수 태그
-          height: 630, // 👈 디버거가 요구한 필수 태그
+          width: 1200, // 🚀 디버거가 요구한 가로 크기 (숫자)
+          height: 630, // 🚀 디버거가 요구한 세로 크기 (숫자)
+          type: 'image/png', // 이미지 타입 명시로 속도 향상
         },
       ],
       type: "website",
