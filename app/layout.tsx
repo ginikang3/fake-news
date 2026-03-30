@@ -22,7 +22,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   if (t) {
     try {
       titleText = decodeURIComponent(Buffer.from(t, 'base64').toString('utf-8'));
-    } catch (e) { /* 디코딩 실패 시 기본값 */ }
+    } catch (e) { console.error(e); }
   }
 
   return {
@@ -31,14 +31,11 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     openGraph: {
       title: titleText,
       description: "Haz clic para ver la noticia completa.",
-      url: "./",
-      siteName: "Noticiario Bromas MX",
       images: [
         {
           url: imageUrl,
-          width: 1200, // 🚀 디버거가 요구한 가로 크기 (숫자)
-          height: 630, // 🚀 디버거가 요구한 세로 크기 (숫자)
-          type: 'image/png', // 이미지 타입 명시로 속도 향상
+          width: 1200, // 👈 필수
+          height: 630, // 👈 필수
         },
       ],
       type: "website",
