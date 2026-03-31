@@ -1,193 +1,43 @@
-'use client';
+import ClientPage from './ClientPage';
+import type { Metadata } from "next";
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import imageCompression from 'browser-image-compression';
+type Props = {
+  searchParams: { t?: string; i?: string };
+};
 
-function NewsContent() {
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(false);
-  const [link, setLink] = useState('');
-  const [mounted, setMounted] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [title, setTitle] = useState('¡ÚLTIMO MOMENTO!');
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const t = searchParams?.t;
+  const i = searchParams?.i;
 
-  const t = searchParams.get('t');
-  const i = searchParams.get('i');
+  const imageUrl = i
+    ? decodeURIComponent(i)
+    : "https://latam-en-vivo.online/thumbnail.png";
 
-  useEffect(() => {
-    setMounted(true);
-    if (t) {
-      try {
-        setTitle(decodeURIComponent(window.atob(t)));
-      } catch (e) { console.error(e); }
-      const timer = setTimeout(() => setShowModal(true), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [t]);
-
-  const handleCopy = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('¡Copiado!');
-    } catch (err) {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      alert('¡Copiado!');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const inputTitle = formData.get('title') as string;
-    const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
-    const file = fileInput?.files?.[0];
-
-    if (!file) {
-      alert('Selecciona una imagen.');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // ✅ 압축 완화 (0.1 → 0.3)
-      const compressedFile = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 800 });
-
-      // ✅ 확장자 추가 (핵심)
-      const fileName = `news_${Date.now()}.jpg`;
-
-      const { error: uploadError } = await supabase
-        .storage
-        .from('news-images')
-        .upload(fileName, compressedFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase
-        .storage
-        .from('news-images')
-        .getPublicUrl(fileName);
-
-      await supabase.from('news_posts').insert([
-        { title: inputTitle, image_url: publicUrl }
-      ]);
-
-      const encodedTitle = window.btoa(encodeURIComponent(inputTitle));
-
-      setLink(
-        `${window.location.origin}/?t=${encodedTitle}&i=${encodeURIComponent(publicUrl)}&v=${Date.now()}`
-      );
-
-    } catch (err: any) {
-      alert('Error: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!mounted) return null;
+  let titleText = "¡NOTICIA DE ÚLTIMA HORA!";
 
   if (t) {
-    return (
-      <div className="min-h-screen bg-white text-black font-sans text-left">
-        <div className="bg-red-700 text-white py-3 px-4 flex items-center justify-between font-black italic shadow-lg sticky top-0 z-50">
-          <span className="text-xl tracking-tighter uppercase font-black">
-            NOTICIARIO <span className="bg-white text-red-700 px-1 ml-1 font-black">BROMAS MX</span>
-          </span>
-          <span className="animate-pulse text-sm flex items-center font-bold font-black">
-            <span className="w-2 h-2 bg-white rounded-full mr-2"></span> EN VIVO
-          </span>
-        </div>
-
-        <div className="p-5 max-w-2xl mx-auto mt-4 text-left">
-          <div className="inline-block bg-black text-white text-[10px] font-bold px-2 py-1 mb-4 uppercase tracking-widest">
-            EXCLUSIVA MUNDIAL
-          </div>
-
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-8">
-            {title}
-          </h1>
-
-          <div className="aspect-video w-full mb-8 shadow-2xl rounded-lg overflow-hidden border border-gray-200 relative bg-gray-100">
-            <img
-              src={i ? decodeURIComponent(i as string) : "/thumbnail.png"}
-              alt="Noticia"
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="space-y-6 text-gray-800 leading-relaxed text-lg">
-            <p className="font-bold text-red-700 underline decoration-red-200 decoration-4 underline-offset-4">
-              [CIUDAD DE MÉXICO] — ÚLTIMA HORA:
-            </p>
-            <p>
-              Fuentes oficiales han confirmado hace apenas unos minutos un suceso que ha dejado a la comunidad internacional en estado de shock absoluto.
-            </p>
-          </div>
-        </div>
-
-        {showModal && (
-          <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-6 z-[9999]">
-            <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl text-black font-black">
-              <div className="text-7xl mb-5">🤣</div>
-              <h2 className="text-4xl font-black mb-3 italic tracking-tighter">¡CAÍSTE!</h2>
-              <p className="text-gray-700 mb-8">
-                Esta noticia es totalmente falsa. <br />Fuiste troleado por un amigo.
-              </p>
-              <button
-                onClick={() => window.location.href = '/'}
-                className="w-full bg-red-600 text-white font-bold py-5 rounded-2xl uppercase"
-              >
-                ¡QUIERO TROLEARE!
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
+    try {
+      titleText = decodeURIComponent(
+        Buffer.from(t, 'base64').toString('utf-8')
+      );
+    } catch {}
   }
 
-  return (
-    <main className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden p-8 border-b-8 border-red-600">
-        <h1 className="text-2xl font-black text-center mb-6 text-red-600 italic uppercase">
-          Crear Noticia Falsa
-        </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-6 text-black">
-          <input name="title" required placeholder="Título" className="w-full border p-3" />
-          <input type="file" name="image" accept="image/*" required />
-
-          <button className="w-full bg-red-600 text-white py-4">
-            {loading ? 'PUBLICANDO...' : '¡GENERAR LINK!'}
-          </button>
-        </form>
-
-        {link && (
-          <div className="mt-4">
-            <input readOnly value={link} className="w-full p-2 border mb-2" />
-            <button onClick={() => handleCopy(link)} className="w-full bg-blue-600 text-white py-2">
-              Copiar
-            </button>
-          </div>
-        )}
-      </div>
-    </main>
-  );
+  return {
+    title: titleText,
+    openGraph: {
+      title: titleText,
+      description: "Haz clic para ver la noticia completa.",
+      images: [imageUrl],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: titleText,
+      images: [imageUrl],
+    },
+  };
 }
 
-export default function CombinedPage() {
-  return (
-    <Suspense fallback={<div>Cargando...</div>}>
-      <NewsContent />
-    </Suspense>
-  );
+export default function Page() {
+  return <ClientPage />;
 }
