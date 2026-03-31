@@ -7,22 +7,30 @@ export const dynamic = 'force-dynamic';
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
+// ✅ Promise 제거 (핵심)
 type Props = {
-  searchParams: Promise<{ [key: string]: string | undefined }>;
+  searchParams: { [key: string]: string | undefined };
 };
 
+// ✅ async 유지해도 되고, 없어도 됨 (여기선 유지)
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const params = await searchParams;
-  const t = params?.t;
-  const i = params?.i;
+  const t = searchParams?.t;
+  const i = searchParams?.i;
 
-  const imageUrl = i ? decodeURIComponent(i) : "https://latam-en-vivo.online/thumbnail.png";
+  const imageUrl = i
+    ? decodeURIComponent(i)
+    : "https://latam-en-vivo.online/thumbnail.png";
+
   let titleText = "¡NOTICIA DE ÚLTIMA HORA!";
 
   if (t) {
     try {
-      titleText = decodeURIComponent(Buffer.from(t, 'base64').toString('utf-8'));
-    } catch (e) { console.error(e); }
+      titleText = decodeURIComponent(
+        Buffer.from(t, 'base64').toString('utf-8')
+      );
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   return {
@@ -31,7 +39,13 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
     openGraph: {
       title: titleText,
       description: "Haz clic para ver la noticia completa.",
-      images: [{ url: imageUrl, width: 1200, height: 630 }],
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+        },
+      ],
       type: "website",
     },
     twitter: {
