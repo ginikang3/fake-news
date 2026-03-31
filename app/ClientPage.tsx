@@ -52,17 +52,21 @@ function NewsContent() {
     }
 
     try {
+      // ✅ 압축 약간 완화 (WhatsApp 대응)
       const compressedFile = await imageCompression(file, {
-        maxSizeMB: 0.3,
+        maxSizeMB: 0.5,
         maxWidthOrHeight: 800,
       });
 
       const fileName = `news_${Date.now()}.jpg`;
 
+      // ✅ 핵심 수정: contentType 추가
       const { error: uploadError } = await supabase
         .storage
         .from('news-images')
-        .upload(fileName, compressedFile);
+        .upload(fileName, compressedFile, {
+          contentType: 'image/jpeg',
+        });
 
       if (uploadError) throw uploadError;
 
