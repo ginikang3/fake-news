@@ -5,8 +5,25 @@ import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import imageCompression from 'browser-image-compression';
 
+/* =========================
+   SAFE BASE64 HELPERS
+========================= */
+function encodeTitle(str: string) {
+  return window.btoa(unescape(encodeURIComponent(str)));
+}
+
+function decodeTitle(str: string | null) {
+  if (!str) return '¡ÚLTIMA HORA!';
+  try {
+    return decodeURIComponent(escape(window.atob(str)));
+  } catch {
+    return '¡ÚLTIMA HORA!';
+  }
+}
+
 function NewsContent() {
   const searchParams = useSearchParams();
+
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -18,11 +35,14 @@ function NewsContent() {
 
   useEffect(() => {
     setMounted(true);
+
     if (t) {
-      try {
-        setTitle(window.atob(t));
-      } catch {}
-      const timer = setTimeout(() => setShowModal(true), 3500);
+      setTitle(decodeTitle(t));
+
+      const timer = setTimeout(() => {
+        setShowModal(true);
+      }, 3500);
+
       return () => clearTimeout(timer);
     }
   }, [t]);
@@ -38,7 +58,11 @@ function NewsContent() {
 
     const formData = new FormData(e.currentTarget);
     const inputTitle = formData.get('title') as string;
-    const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
+
+    const fileInput = e.currentTarget.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+
     const file = fileInput?.files?.[0];
 
     if (!file) {
@@ -69,17 +93,17 @@ function NewsContent() {
         return;
       }
 
-      const { data: { publicUrl } } = supabase
-        .storage
+      const { data } = supabase.storage
         .from('news-images')
         .getPublicUrl(fileName);
 
-      const encodedTitle = window.btoa(encodeURIComponent(inputTitle));
+      const encodedTitle = encodeTitle(inputTitle);
 
       setLink(
-        `${window.location.origin}/?t=${encodedTitle}&i=${encodeURIComponent(publicUrl)}&v=${Date.now()}`
+        `${window.location.origin}/?t=${encodedTitle}&i=${encodeURIComponent(
+          data.publicUrl
+        )}&v=${Date.now()}`
       );
-
     } finally {
       setLoading(false);
     }
@@ -87,14 +111,13 @@ function NewsContent() {
 
   if (!mounted) return null;
 
-  // =========================
-  // 📰 ARTICLE PAGE
-  // =========================
+  /* =========================
+     ARTICLE PAGE
+  ========================= */
   if (t) {
     return (
       <div className="min-h-screen bg-gray-100 text-black">
 
-        {/* TOP BAR */}
         <header className="bg-red-600 text-white shadow-md">
           <div className="max-w-3xl mx-auto flex justify-between items-center px-4 py-3">
             <div className="font-black tracking-widest text-lg">
@@ -107,11 +130,9 @@ function NewsContent() {
           </div>
         </header>
 
-        {/* ARTICLE */}
         <main className="max-w-3xl mx-auto p-4 mt-6">
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-
             <div className="p-5">
 
               <span className="inline-block bg-black text-white text-xs px-3 py-1 rounded-full mb-4">
@@ -130,22 +151,19 @@ function NewsContent() {
               </div>
 
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <p className="text-red-600 font-bold mb-2 uppercase text-sm">
+                <p className="text-red-600 font-bold mb-2 text-sm uppercase">
                   Informe exclusivo
                 </p>
-
                 <p className="text-gray-800 leading-relaxed text-lg">
                   Fuentes cercanas confirman que el evento ha generado una gran reacción en redes sociales.
-                  La situación continúa desarrollándose y mantiene a la población en alerta.
+                  La situación continúa desarrollándose.
                 </p>
               </div>
 
             </div>
-
           </div>
         </main>
 
-        {/* FAKE MODAL */}
         {showModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl p-6 text-center max-w-sm w-full shadow-2xl">
@@ -153,8 +171,8 @@ function NewsContent() {
               <h2 className="text-2xl font-black mb-2">¡CAÍSTE!</h2>
               <p className="text-gray-600 mb-5">Esta noticia es falsa.</p>
               <button
-                onClick={() => window.location.href = '/'}
-                className="bg-red-600 text-white w-full py-3 rounded-xl font-bold hover:bg-red-700"
+                onClick={() => (window.location.href = '/')}
+                className="bg-red-600 text-white w-full py-3 rounded-xl font-bold"
               >
                 Crear otra noticia
               </button>
@@ -166,9 +184,9 @@ function NewsContent() {
     );
   }
 
-  // =========================
-  // 🛠 CREATOR PAGE
-  // =========================
+  /* =========================
+     CREATOR PAGE
+  ========================= */
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 flex items-center justify-center p-4">
 
@@ -178,9 +196,6 @@ function NewsContent() {
           <h1 className="text-2xl font-black text-red-600">
             Generador de Noticias
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Crea una noticia viral en segundos
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -192,7 +207,7 @@ function NewsContent() {
             <input
               name="title"
               placeholder="Ej: Cantante desaparece misteriosamente"
-              className="w-full mt-1 border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full mt-1 border border-gray-300 text-black placeholder-gray-400 bg-white rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-red-400"
               required
             />
           </div>
@@ -204,14 +219,12 @@ function NewsContent() {
             <input
               type="file"
               accept="image/*"
-              className="w-full mt-1 border rounded-xl p-3 bg-gray-50"
+              className="w-full mt-1 border border-gray-300 text-black bg-white rounded-xl p-3"
               required
             />
           </div>
 
-          <button
-            className="w-full bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 transition"
-          >
+          <button className="w-full bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700">
             {loading ? 'Generando...' : 'Crear noticia'}
           </button>
 
@@ -227,7 +240,7 @@ function NewsContent() {
             <input
               value={link}
               readOnly
-              className="w-full p-2 border rounded-lg text-sm mb-3"
+              className="w-full p-2 border rounded-lg text-sm mb-3 text-black bg-white"
             />
 
             <button
