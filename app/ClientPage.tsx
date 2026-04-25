@@ -236,29 +236,52 @@ function NewsContent() {
 
         </form>
 
+        {/* 여기 {link && (...) } 이 부분을 찾아서 아래 코드로 싹 바꾸세요 */}
         {link && (
-          <div className="mt-6 bg-gray-50 border rounded-xl p-4 text-center">
+          <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            {/* 1. 사칭범에게 보낼 링크 (빨간색 칸) */}
+            <div className="bg-white border-2 border-red-500 rounded-2xl p-5 shadow-lg relative">
+              <div className="absolute -top-3 left-4 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-md">
+                LINK PARA EL IMPOSTOR
+              </div>
+              <p className="text-xs font-bold text-gray-500 mb-2">사칭범에게 이 링크를 보내세요:</p>
+              <input
+                readOnly
+                value={`${window.location.origin}/news/${link.split('/news/')[1]?.split('\n')[0]}`}
+                className="w-full p-3 bg-gray-50 border rounded-xl text-sm font-mono text-black mb-3 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => handleCopy(`${window.location.origin}/news/${link.split('/news/')[1]?.split('\n')[0]}`)}
+                className="w-full bg-red-600 text-white py-3 rounded-xl font-black uppercase tracking-widest hover:bg-red-700 transition"
+              >
+                Copiar enlace de noticia
+              </button>
+            </div>
 
-            <p className="text-xs text-gray-500 mb-2">
-              Enlace generado
-            </p>
-
-            <input
-              value={link}
-              readOnly
-              className="w-full p-2 border rounded-lg text-sm mb-3 text-black bg-white"
-            />
-
-            <button
-              onClick={() => handleCopy(link)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold w-full hover:bg-blue-700"
-            >
-              Copiar enlace
-            </button>
+            {/* 2. 여학생 확인용 추적 대시보드 (검은색 칸) */}
+            <div className="bg-zinc-900 border-2 border-zinc-800 rounded-2xl p-5 shadow-xl relative">
+              <div className="absolute -top-3 left-4 bg-zinc-100 text-black text-[10px] font-black px-2 py-1 rounded shadow-md">
+                TU PANEL DE RASTREO
+              </div>
+              <p className="text-xs font-bold text-zinc-500 mb-2">실시간 위치 추적 확인:</p>
+              <input
+                readOnly
+                value={`${window.location.origin}/track/${link.split('/track/')[1]}`}
+                className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-xl text-sm font-mono text-green-400 mb-3 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => window.open(`${window.location.origin}/track/${link.split('/track/')[1]}`, '_blank')}
+                className="w-full bg-white text-black py-3 rounded-xl font-black uppercase tracking-widest hover:bg-gray-200 transition"
+              >
+                Abrir Rastreador
+              </button>
+            </div>
 
           </div>
         )}
-
       </div>
     </main>
   );
