@@ -70,11 +70,10 @@ export default async function NewsDetailPage({ params }: Props) {
 
         <div className="space-y-6 text-gray-800 leading-relaxed text-lg border-t pt-8">
           <p className="font-bold text-red-700 underline decoration-red-200 decoration-4 underline-offset-4">
-            [NOTICIA CONFIRMADA] — ÚLTIMA HORA:
+            ¡ESTA NOTICIA ES FALSA!:
           </p>
           <p>
-            Fuentes oficiales han confirmado un suceso que ha dejado a la comunidad internacional en shock. 
-            Se espera un comunicado oficial en las próximas horas.
+            ¡Has caído en la broma!
           </p>
           <div className="py-10 text-center text-gray-400 italic text-sm animate-pulse">
             Cargando más información...
