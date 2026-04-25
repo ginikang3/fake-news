@@ -245,7 +245,7 @@ function NewsContent() {
               <div className="absolute -top-3 left-4 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-md">
                 LINK PARA EL IMPOSTOR
               </div>
-              <p className="text-xs font-bold text-gray-500 mb-2">사칭범에게 이 링크를 보내세요:</p>
+              <p className="text-xs font-bold text-gray-500 mb-2">Copia y envía este enlace:</p>
               <input
                 readOnly
                 value={`${window.location.origin}/news/${link.split('/news/')[1]?.split('\n')[0]}`}
@@ -265,7 +265,12 @@ function NewsContent() {
               <div className="absolute -top-3 left-4 bg-zinc-100 text-black text-[10px] font-black px-2 py-1 rounded shadow-md">
                 TU PANEL DE RASTREO
               </div>
-              <p className="text-xs font-bold text-zinc-500 mb-2">실시간 위치 추적 확인:</p>
+              <p className="text-xs font-black text-red-500 mb-2 animate-pulse">
+  ⚠️ ATENCIÓN: No compartas este enlace con nadie
+</p>
+<p className="text-[10px] font-bold text-zinc-500 mb-2 italic">
+  Rastreo en tiempo real:
+</p>
               <input
                 readOnly
                 value={`${window.location.origin}/track/${link.split('/track/')[1]}`}
