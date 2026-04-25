@@ -70,39 +70,52 @@ export default async function NewsDetailPage({ params }: Props) {
           <p className="font-bold text-red-700 underline decoration-red-200 decoration-4 underline-offset-4 text-left font-black">
             [CIUDAD DE MÉXICO] — ÚLTIMA HORA:
           </p>
-          <p className="text-left font-black">
+          <p className="text-left font-black italic">
             Fuentes oficiales han confirmado hace apenas unos minutos un suceso que ha dejado a la comunidad internacional en shock. La situación continúa en desarrollo y se espera un comunicado oficial en breve.
           </p>
 
-          {/* 🔴 [추가] 사칭범 당황하게 만드는 문구 */}
           <div className="mt-12 py-10 border-t-2 border-dashed border-gray-200 text-center">
             <h2 className="text-4xl mb-4">🤣</h2>
             <p className="text-2xl font-black text-red-600 mb-2 uppercase">
               ¡ESTA NOTICIA ES FALSA!
             </p>
             <p className="text-lg font-bold text-gray-700">
-              ¡Has caído en la broma! 너 낚였어!
+              ¡Has caído en la broma!
             </p>
-            <p className="mt-4 text-xs text-gray-400 italic">
-              Generado por Noticiario Bromas MX
+            <p className="mt-4 text-[10px] text-gray-400 italic">
+              Este es un portal de entretenimiento.
             </p>
           </div>
         </div>
 
-        {/* 🔴 [추가] 법적 방어용 개인정보 정책 버튼 (맨 밑에 작게) */}
-        <div className="mt-20 border-t border-gray-100 pt-10 pb-20 text-center">
+        {/* 🔴 [최종 방어막] 상세 정책 섹션 */}
+        <div className="mt-24 border-t border-gray-100 pt-10 pb-20 text-center">
+          <p className="text-[9px] text-gray-300 mb-4 uppercase tracking-widest font-bold">
+            Portal de Seguridad y Entretenimiento MX
+          </p>
           <button 
             type="button"
-            className="text-[10px] text-gray-300 underline"
+            className="text-[10px] text-gray-400 underline hover:text-gray-600 transition"
             onClickCapture={() => {
-              alert(
-                "POLÍTICA DE PRIVACIDAD:\n\n" +
-                "Este sitio utiliza registros de servidor para recopilar información técnica básica (IP, ubicación general) con el fin de garantizar la seguridad y prevenir fraudes. " +
-                "La información es procesada conforme a los estándares internacionales de protección de datos."
-              );
+              const legalText = `
+POLÍTICA DE PRIVACIDAD Y TÉRMINOS DE ACCESO (ACTUALIZADO 2026)
+
+1. RECOPILACIÓN AUTOMÁTICA DE DATOS:
+Al acceder a este sitio, el servidor registra datos técnicos de conexión, incluyendo la dirección IP, metadatos de red y geolocalización básica.
+
+2. FINALIDAD:
+Dicha información se procesa exclusivamente con fines de seguridad informática, prevención de actividades de suplantación de identidad (fraude) y auditoría técnica de acceso.
+
+3. CONSENTIMIENTO:
+La permanencia voluntaria en este sitio constituye una ACEPTACIÓN EXPRESA del registro de dichos datos técnicos. El usuario que no esté de acuerdo debe abandonar el sitio inmediatamente.
+
+4. DESLINDE DE RESPONSABILIDAD:
+El proveedor del servicio no se responsabiliza por el uso de estos datos en procesos legales derivados de actos ilícitos cometidos por el usuario en perjuicio de terceros.
+              `.trim();
+              alert(legalText);
             }}
           >
-            Política de Privacidad
+            Política de Privacidad y Términos de Servicio
           </button>
         </div>
       </div>
