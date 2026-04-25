@@ -58,11 +58,7 @@ function NewsContent() {
 
     const formData = new FormData(e.currentTarget);
     const inputTitle = formData.get('title') as string;
-
-    const fileInput = e.currentTarget.querySelector(
-      'input[type="file"]'
-    ) as HTMLInputElement;
-
+    const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement;
     const file = fileInput?.files?.[0];
 
     if (!file) {
@@ -72,6 +68,7 @@ function NewsContent() {
     }
 
     try {
+      // 1. 이미지 압축
       const compressedFile = await imageCompression(file, {
         maxSizeMB: 0.2,
         maxWidthOrHeight: 600,
@@ -79,31 +76,40 @@ function NewsContent() {
         initialQuality: 0.7,
       });
 
+      // 2. Storage에 이미지 업로드
       const fileName = `news_${Date.now()}.jpg`;
-
-      const { error } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('news-images')
-        .upload(fileName, compressedFile, {
-          contentType: 'image/jpeg',
-        });
+        .upload(fileName, compressedFile, { contentType: 'image/jpeg' });
 
-      if (error) {
-        alert('Error al subir imagen');
-        setLoading(false);
-        return;
-      }
+      if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
-        .from('news-images')
-        .getPublicUrl(fileName);
+      // 3. 이미지 공용 URL 따오기
+      const { data: urlData } = supabase.storage.from('news-images').getPublicUrl(fileName);
+      const publicImageUrl = urlData.publicUrl;
 
-      const encodedTitle = encodeTitle(inputTitle);
+      // 🔴 4. [핵심] DB에 제목과 이미지 주소 저장 (사칭범 정보 칸은 비워둠)
+      const { data: dbData, error: dbError } = await supabase
+        .from('news_posts')
+        .insert({
+          title: inputTitle,
+          image_url: publicImageUrl,
+          is_caught: false
+        })
+        .select()
+        .single();
 
+      if (dbError) throw dbError;
+
+      // 5. 여학생에게 보여줄 링크 결과값 설정
+      const origin = window.location.origin;
       setLink(
-        `${window.location.origin}/?t=${encodedTitle}&i=${encodeURIComponent(
-          data.publicUrl
-        )}&v=${Date.now()}`
+        `🔗 [사칭범에게 보낼 뉴스 링크]\n${origin}/news/${dbData.id}\n\n` +
+        `📡 [실시간 위치 추적 대시보드]\n${origin}/track/${dbData.id}`
       );
+
+    } catch (err: any) {
+      alert('Error: ' + err.message);
     } finally {
       setLoading(false);
     }
