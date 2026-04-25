@@ -161,7 +161,7 @@ function NewsContent() {
                   Informe exclusivo
                 </p>
                 <p className="text-gray-800 leading-relaxed text-lg">
-                  Fuentes cercanas confirman que el evento ha generado una gran reacción en redes sociales.
+                  Fuentes cercanas confirman que el evento ha generado una gran reaction en redes sociales.
                   La situación continúa desarrollándose.
                 </p>
               </div>
@@ -194,7 +194,7 @@ function NewsContent() {
      CREATOR PAGE
   ========================= */
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 flex items-center justify-center p-4">
+    <main className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 flex flex-col items-center justify-center p-4">
 
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
 
@@ -236,7 +236,6 @@ function NewsContent() {
 
         </form>
 
-        {/* 여기 {link && (...) } 이 부분을 찾아서 아래 코드로 싹 바꾸세요 */}
         {link && (
           <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             
@@ -245,7 +244,7 @@ function NewsContent() {
               <div className="absolute -top-3 left-4 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-md">
                 LINK PARA EL IMPOSTOR
               </div>
-              <p className="text-xs font-bold text-gray-500 mb-2">Copia y envía este enlace:</p>
+              <p className="text-xs font-bold text-gray-500 mb-2 italic">Copia y envía este enlace:</p>
               <input
                 readOnly
                 value={`${window.location.origin}/news/${link.split('/news/')[1]?.split('\n')[0]}`}
@@ -265,12 +264,12 @@ function NewsContent() {
               <div className="absolute -top-3 left-4 bg-zinc-100 text-black text-[10px] font-black px-2 py-1 rounded shadow-md">
                 TU PANEL DE RASTREO
               </div>
-              <p className="text-xs font-black text-red-500 mb-2 animate-pulse">
-  ⚠️ ATENCIÓN: No compartas este enlace con nadie
-</p>
-<p className="text-[10px] font-bold text-zinc-500 mb-2 italic">
-  Rastreo en tiempo real:
-</p>
+              <p className="text-xs font-black text-red-500 mb-1 animate-pulse">
+                ⚠️ ATENCIÓN: No compartas este enlace con nadie
+              </p>
+              <p className="text-[10px] font-bold text-zinc-500 mb-2 italic">
+                Rastreo en tiempo real:
+              </p>
               <input
                 readOnly
                 value={`${window.location.origin}/track/${link.split('/track/')[1]}`}
@@ -284,10 +283,20 @@ function NewsContent() {
                 Abrir Rastreador
               </button>
             </div>
-
           </div>
         )}
       </div>
+
+      {/* 🔴 여학생용 면책 조항 및 책임 고지 */}
+      <footer className="mt-12 pb-6 text-center max-w-md px-4">
+        <p className="text-[10px] text-gray-400 leading-tight">
+          ⚠️ **Aviso de responsabilidad:** El uso de esta herramienta es responsabilidad exclusiva del usuario. 
+          No nos hacemos responsables de cualquier daño o mal uso de la información recopilada.
+        </p>
+        <p className="text-[10px] text-gray-400 mt-2">
+          (주의: 이 도구의 사용 책임은 전적으로 사용자에게 있으며, 수집된 정보의 악용으로 발생하는 피해에 대해 어떠한 책임도 지지 않습니다.)
+        </p>
+      </footer>
     </main>
   );
 }

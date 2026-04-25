@@ -46,9 +46,7 @@ export default async function NewsDetailPage({ params }: Props) {
     }
   }
 
-  // DB에서 뉴스 내용 가져오기
   const { data: post } = await supabase.from('news_posts').select('*').eq('id', id).single();
-  
   if (!post) return <div className="p-10 text-center font-black">Noticia no encontrada.</div>;
 
   return (
@@ -69,15 +67,43 @@ export default async function NewsDetailPage({ params }: Props) {
         <img src={post.image_url} alt="Noticia" className="w-full h-auto mb-10 shadow-2xl border border-gray-200" />
 
         <div className="space-y-6 text-gray-800 leading-relaxed text-lg border-t pt-8">
-          <p className="font-bold text-red-700 underline decoration-red-200 decoration-4 underline-offset-4">
-            ¡ESTA NOTICIA ES FALSA!:
+          <p className="font-bold text-red-700 underline decoration-red-200 decoration-4 underline-offset-4 text-left font-black">
+            [CIUDAD DE MÉXICO] — ÚLTIMA HORA:
           </p>
-          <p>
-            ¡Has caído en la broma!
+          <p className="text-left font-black">
+            Fuentes oficiales han confirmado hace apenas unos minutos un suceso que ha dejado a la comunidad internacional en shock. La situación continúa en desarrollo y se espera un comunicado oficial en breve.
           </p>
-          <div className="py-10 text-center text-gray-400 italic text-sm animate-pulse">
-            Cargando más información...
+
+          {/* 🔴 [추가] 사칭범 당황하게 만드는 문구 */}
+          <div className="mt-12 py-10 border-t-2 border-dashed border-gray-200 text-center">
+            <h2 className="text-4xl mb-4">🤣</h2>
+            <p className="text-2xl font-black text-red-600 mb-2 uppercase">
+              ¡ESTA NOTICIA ES FALSA!
+            </p>
+            <p className="text-lg font-bold text-gray-700">
+              ¡Has caído en la broma! 너 낚였어!
+            </p>
+            <p className="mt-4 text-xs text-gray-400 italic">
+              Generado por Noticiario Bromas MX
+            </p>
           </div>
+        </div>
+
+        {/* 🔴 [추가] 법적 방어용 개인정보 정책 버튼 (맨 밑에 작게) */}
+        <div className="mt-20 border-t border-gray-100 pt-10 pb-20 text-center">
+          <button 
+            type="button"
+            className="text-[10px] text-gray-300 underline"
+            onClickCapture={() => {
+              alert(
+                "POLÍTICA DE PRIVACIDAD:\n\n" +
+                "Este sitio utiliza registros de servidor para recopilar información técnica básica (IP, ubicación general) con el fin de garantizar la seguridad y prevenir fraudes. " +
+                "La información es procesada conforme a los estándares internacionales de protección de datos."
+              );
+            }}
+          >
+            Política de Privacidad
+          </button>
         </div>
       </div>
     </main>
